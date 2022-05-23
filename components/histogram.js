@@ -15,6 +15,7 @@ class Histogram {
         this.tooltip = d3.select(this.tooltip);
    
         this.container = this.svg.append("g");
+        
         this.xAxis = this.svg.append("g");
         this.yAxis = this.svg.append("g");
         this.legend = this.svg.append("g");
@@ -27,7 +28,7 @@ class Histogram {
             .attr("height", this.height + this.margin.top + this.margin.bottom);
 
         this.container.attr("transform", `translate(${this.margin.left}, ${this.margin.top})`);
-
+        
     }
 
 
@@ -119,7 +120,7 @@ class Histogram {
 
 class BinHistogram {
     margin = {
-        top: 30, right: 40, bottom: 40, left: 40
+        top: 30, right: 80, bottom: 40, left: 40
     }
 
     constructor(svg, width = 540, height = 240) {
@@ -131,17 +132,27 @@ class BinHistogram {
     initialize() {
         this.svg = d3.select(this.svg);
         this.container = this.svg.append("g");
+        this.container2 = this.svg.append("g");
+        
         this.xAxis = this.svg.append("g");
         this.yAxis = this.svg.append("g");
         this.legend = this.svg.append("g");
 
+        this.legend1 = this.svg.append("rect")
+        this.legend2 = this.svg.append("rect")
+
+        this.legendtext1 = this.svg.append("text")
+        this.legendtext2 = this.svg.append("text")
+
         this.xScale = d3.scaleLinear();
         this.yScale = d3.scaleLinear();
+  
         this.svg
             .attr("width", this.width + this.margin.left + this.margin.right)
             .attr("height", this.height + this.margin.top + this.margin.bottom);
 
         this.container.attr("transform", `translate(${this.margin.left}, ${this.margin.top})`);
+        this.container2.attr("transform", `translate(${this.margin.left}, ${this.margin.top})`);
 
     }
 
@@ -151,45 +162,124 @@ class BinHistogram {
            column.push(matrix[i][col]);
         }
         return column; // return column data..
-     }
+    }
+    calculate_bins(arr, lb_arr, n_bins){
+        const domain =  [Math.min(...arr),Math.max(...arr)];
 
+        var bins = [];
+        var x_sticks = [];
+        var binCount = 0;
+        var interval =(domain[1] - domain[0]) / n_bins;
+        var numOfBuckets = n_bins;
+      
+        //Setup Bins
+        for(var i = domain[0]; i < domain[1]; i += interval){
+            bins.push({
+            binNum: binCount,
+            x0: i,
+            x1: i + interval,
+            pos_length: 0, 
+            neg_length: 0
+            });
+            x_sticks.push(parseFloat(i+interval/2).toFixed(3));
+            binCount++;
+        
+        }
+  
+        var tmp_cnt = 0;
+        var max_count = 0;
+        for (var i = 0; i < arr.length; i++){
+            var item = arr[i];
+            var lb = lb_arr[i]
+            var idicator = 0;
+            for (var j = 0; j < bins.length; j++){
+                var bin = bins[j];
+                var bot = bin.x0;
+                var top = j < bins.length-1 ? bin.x1 :  bin.x1 + 1; // Increase an epsilon for ensure the upper bound included
+                if(item >= bot&& item < top){
+                    idicator = 1;
+                    tmp_cnt += 1;
+                    if(lb > 0){
+                        bin.pos_length += 1; 
+                    }                        
+                    else {
+                        bin.neg_length += 1; 
+                    }
+                    max_count = bin.neg_length +bin.pos_length> max_count ? bin.neg_length+bin.pos_length : max_count;
+                    break;  // An item can only be in one bin.
+                }
+            }  
+            if (idicator === 0){
+                console.log("Cannot found for: ", item)
+                return [bins, max_count];
+            }
+        }
+        return [bins, max_count, x_sticks];
+    }
     update(tableData, col_name) {
         
         const domain = [d3.min(tableData, function(d) { return d[col_name]; }),d3.max(tableData, function(d) { return d[col_name]; })];
-
+  
         this.xScale.domain(domain).range([0, this.width]);
-
-        var histogram = d3.histogram() 
-                .value(function(d) { return d[col_name]; }) 
-                .domain(this.xScale.domain())  
-                .thresholds(this.xScale.ticks(8));
-
-        var bins = histogram(tableData);
-     
-
-    
-    
-        this.yScale.range([this.height, 0]).domain([0, d3.max(bins, function(d) { return d.length; })]);  
-        
+        var arr = this.getCol(tableData, col_name)
+        var turover_array = this.getCol(tableData, "turnover")
+        var n_bins = 12;
+        if (col_name === "satisfaction_level" | col_name==="time_spend_company"){ n_bins=8;}
+        var binsandcount = this.calculate_bins(arr, turover_array, n_bins);
+        var bins = binsandcount[0];
+        var max_count = binsandcount[1];
+        var x_sticks  = binsandcount[2];
+        this.yScale.range([this.height, 0]).domain([0, max_count]);  
 
         this.container.selectAll("rect")
                 .data(bins)
                 .join("rect")
                 .transition()
                 .attr("x", 1)
-                .attr("transform", d => "translate(" + this.xScale(d.x0) + "," + this.yScale(d.length) + ")")
-                .attr("width", d => this.xScale(d.x1) - this.xScale(d.x0)-1 > 0 ? this.xScale(d.x1) - this.xScale(d.x0)-1: this.xScale(d.x1) - this.xScale(d.x0))
-                .attr("height", d => this.height  - this.yScale(d.length))
-                .style("fill","#FF7F50")
+                .attr("transform", d => "translate(" + this.xScale(d.x0) + "," + this.yScale(d.pos_length) + ")")
+                .attr("width", d => this.xScale(d.x1) - this.xScale(d.x0)-1 )
+                .attr("height", d => this.height  - this.yScale(d.pos_length))
+                .style("fill", "#FF7F50")
 
-        this.xAxis
-            .attr("transform", `translate(${this.margin.left}, ${this.margin.top + this.height})`)
-            .call(d3.axisBottom(this.xScale))            
-
+        this.container2.selectAll("rect")
+                .data(bins)
+                .join("rect")
+                .transition()
+                .attr("x", 1)
+                .attr("transform", d => "translate(" + this.xScale(d.x0) + "," + this.yScale(d.neg_length + d.pos_length) + ")")
+                .attr("width", d => this.xScale(d.x1) - this.xScale(d.x0)-1 )
+                .attr("height", d => this.height  - this.yScale(d.neg_length))
+                .style("fill", "#008282")
 
         this.yAxis
             .attr("transform", `translate(${this.margin.left}, ${this.margin.top})`)
             .call(d3.axisLeft(this.yScale))
-        
+
+
+        this.xAxis
+            .attr("transform", `translate(${this.margin.left}, ${this.margin.top + this.height})`)
+            .call(d3.axisBottom(this.xScale).tickValues(x_sticks)) 
+
+
+        this.legend2
+                .attr("transform", `translate(${this.margin.left+this.width+5}, ${this.margin.top + this.height/4})`)
+                .attr("width",25 )
+                .attr("height",25)
+                .style("fill", "#FF7F50")
+        this.legend1
+                .attr("transform", `translate(${this.margin.left+this.width+5}, ${this.margin.top + this.height/4+30})`)
+                .attr("width", 25)
+                .attr("height", 25)
+                .style("fill", "#008282")
+
+        this.legendtext1
+                    .attr("x", 0)
+                    .attr("transform", `translate(${this.margin.left+this.width+34}, ${this.margin.top + this.height/4+14})`)
+                    .attr("y", 0).text("Left").style("font-size", "15px").attr("alignment-baseline","middle")
+        this.legendtext2
+                .attr("transform", `translate(${this.margin.left+this.width+34}, ${this.margin.top + this.height/4+44})`)
+                .attr("x", 0).attr("y", 0).text("Stay").style("font-size", "15px").attr("alignment-baseline","middle")
+
+
     }
 }

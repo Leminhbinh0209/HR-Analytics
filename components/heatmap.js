@@ -44,13 +44,14 @@ class Heatmap {
 
         this.myColor = d3.scaleSequential()
                 .interpolator(d3.interpolateInferno)
-                .domain([-1,1]);
+                .domain([-0.3,1]);
 
         this.myColor = d3
                 .scaleLinear()
-                .domain([-1, 0,1 ])
-                .range(["#3575B4", "#FFFFAA", "#D73027"])
+                .domain([-0.4, 0.0, 0.5 ,1.0])
+                .range(["#03051A", "#6D1F56", "#EE523F", "#FAEBDD"])
                 .interpolate(d3.interpolateHcl);
+
         this.xScale
                 .range([ 0, this.width ])
                 .domain(this.heat_columns)
@@ -190,9 +191,10 @@ class Heatmap {
         linearGradient
             .selectAll("stop")
             .data([
-                { offset: "0%", color: "#3575B4" },
-                { offset: "50%", color: "#FFFFAA" },
-                { offset: "100%", color: "#D73027" },
+                { offset: "0%", color: "#03051A" },
+                { offset: "18%", color: "#6D1F56" },
+                { offset: "53%", color: "#EE523F" },
+                { offset: "100%", color: "#FAEBDD" },
             ])
             .enter()
             .append("stop")
@@ -217,7 +219,7 @@ class Heatmap {
         var xScale2 = d3
                 .scaleLinear()
                 .range([0, this.legendWidth])
-                .domain([1, -1]);
+                .domain([1, -0.3]);
 
         this.legend_mark.style("font-size", 12)
                 .attr("transform", `translate(${this.margin.left+this.width+10+this.legendHeight}, ${this.margin.top})`)

@@ -21,7 +21,7 @@ class Histogram {
 
         this.xScale = d3.scaleBand();
         this.yScale = d3.scaleLinear();
-
+        
         this.svg
             .attr("width", this.width + this.margin.left + this.margin.right)
             .attr("height", this.height + this.margin.top + this.margin.bottom);

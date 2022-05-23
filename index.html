@@ -49,14 +49,19 @@
 
 <body>
     <header>
-    
+        <nav class="container navbar navbar-light bg-light">
+            <div class="container-fluid">
+                <span class="navbar-brand mb-0 h1" style = "display: inline-block; width: 95%; font-size:200%; text-align: center;" >HR Analytics</span>
+            </div>
+        </nav>
+
 
     </header>
 
     <main class="container">
         <nav class="navbar navbar-light" style="background:#ff4949;">
             <div class="container-fluid">
-                <span class="navbar-brand" style="color:white">HR Analytics -  Task 1</span>
+                <span class="navbar-brand" style="color:white">Task I. Feature Correlation</span>
             </div>
         </nav>
     
@@ -88,7 +93,7 @@
 
         <nav class="navbar navbar-light" style="background:#ff4949;">
             <div class="container-fluid">
-                <span class="navbar-brand" style="color:white">HR Analytics -  Task 2</span>
+                <span class="navbar-brand" style="color:white">Task II. Salary vs. Turnover Ratio</span>
             </div>
         </nav>
         <div class="text-center">
@@ -141,7 +146,7 @@
 
         <nav class="navbar navbar-light" style="background:#ff4949;">
             <div class="container-fluid">
-                <span class="navbar-brand" style="color:white">HR Analytics -  Task 3</span>
+                <span class="navbar-brand" style="color:white">Task III. Feature Distribution</span>
             </div>
         </nav>
         <div class="text-center">
@@ -247,7 +252,15 @@
                         i--;
                     }
                 }
-                heatmap = new Heatmap("#heatmap", heat_columns, "#hm-tooltip");
+                const heat_column_dubbed = ["Satisfaction level",	
+                                        "Last Evaluation",
+                                        "Number Project",	
+                                        "Avg. Hours",
+                                        "Time In Comp.",
+                                        "Work Accident",
+                                        "Promotion", 
+                                        "Turnover"]; /// DEbugin here later ... 
+                heatmap = new Heatmap("#heatmap", heat_columns, heat_column_dubbed, "#hm-tooltip");
                 heatmap.initialize();
                 updateHeatMap();
                 d3.select("select[name=dep-options").on("change", ()=>{updateHeatMap();});

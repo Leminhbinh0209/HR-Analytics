@@ -3,9 +3,10 @@ class Heatmap {
         top: 30, right: 80, bottom: 180, left: 160
     }
 
-    constructor(svg_id, heat_columns, tooltip, width = 320, height = 320) {
+    constructor(svg_id, heat_columns, heat_column_dubbed, tooltip, width = 320, height = 320) {
         this.svg_id = svg_id;
         this.heat_columns = heat_columns;
+        this.heat_column_dubbed = heat_column_dubbed;
         this.tooltip = tooltip;
         this.width = width;
         this.height = height;
@@ -23,6 +24,11 @@ class Heatmap {
 
         this.xScale = d3.scaleBand();
         this.yScale = d3.scaleBand();
+
+        this.xScale_dub = d3.scaleBand();
+        this.yScale_dub = d3.scaleBand();
+
+
         this.caption = this.svg.append("text");
 
         this.legend_mark =  this.svg.append("g");
@@ -54,7 +60,14 @@ class Heatmap {
                 .domain(this.heat_columns.reverse())
                 .padding(0.05);
         
-        
+        this.xScale_dub
+                .range([ 0, this.width ])
+                .domain(this.heat_column_dubbed)
+                .padding(0.05); 
+        this.yScale_dub
+                .range([this.height, 0 ])
+                .domain(this.heat_column_dubbed.reverse())
+                .padding(0.05);
 
     }
     correlationCoefficient(X, Y, n)
@@ -65,13 +78,9 @@ class Heatmap {
             
             for(let i = 0; i < n; i++)
             {
-                // Sum of elements of array X.
-                sum_X = sum_X + X[i];            
-                // Sum of elements of array Y.
-                sum_Y = sum_Y + Y[i];            
-                // Sum of X[i] * Y[i].
-                sum_XY = sum_XY + X[i] * Y[i];            
-                // Sum of square of array elements.
+                sum_X = sum_X + X[i];
+                sum_Y = sum_Y + Y[i];    
+                sum_XY = sum_XY + X[i] * Y[i];       
                 squareSum_X = squareSum_X + X[i] * X[i];
                 squareSum_Y = squareSum_Y + Y[i] * Y[i];
             }
@@ -89,7 +98,7 @@ class Heatmap {
             for(var i=0; i<matrix.length; i++){
                column.push(matrix[i][col]);
             }
-            return column; // return column data..
+            return column; 
          }
 
 
@@ -103,15 +112,12 @@ class Heatmap {
             }
         }
         
-       
-
         this.heats = this.container.selectAll("rect")
                 .data(heat_data)
                 .join("rect")
                 .on("mouseover", (e, d) => {                    
                     this.tooltip.select("#heat-tooltips")
                         .html(`Corr: ${parseFloat(d.corr).toFixed(2)}`);
-                   
                     Popper.createPopper(e.target, this.tooltip.node(), {
                         placement: 'top',
                         modifiers: [
@@ -143,11 +149,11 @@ class Heatmap {
                 .style("stroke", "none")
                 .style("opacity", 0.8);
  
-
+        
         this.xAxis
                 .style("font-size", 12)
                 .attr("transform", `translate(${this.margin.left}, ${this.margin.top + this.height})`)
-                .call(d3.axisBottom(this.xScale).tickSize(0))
+                .call(d3.axisBottom(this.xScale_dub).tickSize(0))
                 .selectAll("text")  
                 .style("text-anchor", "end")
                 .attr("dx", "-.8em")
@@ -158,7 +164,7 @@ class Heatmap {
         this.yAxis
                 .style("font-size", 12)
                 .attr("transform", `translate(${this.margin.left}, ${this.margin.top})`)
-                .call(d3.axisLeft(this.yScale).tickSize(0))
+                .call(d3.axisLeft(this.yScale_dub).tickSize(0))
                 .select(".domain").remove();
 
         this.caption

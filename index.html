@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+
+
+    <script src="components/heatmap.js"></script>
+    <script src="components/histogram.js"></script>
+    <script src="components/datatable.js"></script>
+
+    <title>2020712934</title>
+    <style>
+        body {
+            background: #eee;
+            overflow-y: scroll;
+        }
+
+        .container {
+            width: 800px;
+            background: white;
+        }
+
+        .brushed {
+            stroke-width: 1;
+            stroke: gray;
+            r: 5;
+        }
+        th, td {
+            font-weight: 500;
+            font-size: 12px;
+            }
+    </style>
+</head>
+
+<body>
+    <header>
+    
+
+    </header>
+
+    <main class="container">
+        <nav class="navbar navbar-light" style="background:#ff4949;">
+            <div class="container-fluid">
+                <span class="navbar-brand" style="color:white">HR Analytics -  Task 1</span>
+            </div>
+        </nav>
+    
+        <div class="text-left">
+            <select style="margin: 10px 5px 15px 20px;" name="dep-options" id="dep-selection">
+                <option  href="#" value ="all" name="dep-encoding">All Departments</option>           
+                <option href="#"  value ="Accounting" name="dep-encoding" >Accounting</option>
+                <option  href="#"  value ="HR" name="dep-encoding" >HR</option>
+                <option  href="#" value ="IT" name="dep-encoding" >IT</option>
+                <option  href="#" value ="Management" name="dep-encoding" >Management</option>
+                <option  href="#" value ="Marketing" name="dep-encoding" >Marketing</option>
+                <option  href="#" value ="Product_Mng" name="dep-encoding" >Product_Mng </option>
+                <option  href="#" value ="R&D" name="dep-encoding" >R&D</option>
+                <option  href="#" value ="Sales" name="dep-encoding" >Sales</option>
+                <option  href="#" value ="Support" name="dep-encoding" >Support</option>               
+                <option  href="#" value ="Technical" name="dep-encoding" >Technical</option>  
+            </select>
+        </div>
+        <div class="text-center">
+            <svg width="1800" height="1200" id="heatmap"> </svg>
+        </div>
+
+        <div class="tooltip bs-tooltip-top show" id="hm-tooltip" role="tooltip" style="display:none">
+            <div class="tooltip-arrow"></div>
+            <div class="tooltip-inner" id="heat-tooltips">
+                Some tooltip text!
+            </div>
+        </div>
+
+        <nav class="navbar navbar-light" style="background:#ff4949;">
+            <div class="container-fluid">
+                <span class="navbar-brand" style="color:white">HR Analytics -  Task 2</span>
+            </div>
+        </nav>
+        <div class="text-center">
+            <div class="row pt-2">
+                <div class="col-1 text-end pe-2"><strong>Salary:</strong></div>
+                <div class="col-11">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="sal-encoding" value="all" id="sal-a"
+                        checked>
+                        <label class="form-check-label" for="sal-a">Overall</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="sal-encoding" value="low" id="sal-l">
+                        <label class="form-check-label" for="sal-l">Low</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="sal-encoding" value="medium" id="sal-m">
+                        <label class="form-check-label" for="sal-m">Medium</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="sal-encoding" value="high" id="sal-h">
+                        <label class="form-check-label" for="sal-h">High</label>
+                    </div>
+                </div>
+            </div>
+            <svg width="1800" height="1200" id="histogram"> </svg>
+        </div>
+        <div class="tooltip bs-tooltip-top show" id="sc-tooltip" role="tooltip" style="display:none">
+            <div class="tooltip-arrow"></div>
+            <div class="tooltip-inner" id="bar-tooltips">
+                Some tooltip text!
+            </div>
+        </div>
+
+        <table class="table table-striped text-center">
+            <thead>
+                <tr>
+                    <th>Stat.</th>
+                    <th>Satisfaction level</th>
+                    <th>Last Evaluation</th>
+                    <th>Number Project</th>
+                    <th>Avg. Hours</th>
+                    <th>Time In Comp.</th>
+                    <th>Work Accident</th>
+                    <th>Promotion</th>
+                </tr>
+            </thead>
+            <tbody id="data-table"> </tbody>
+        </table>
+
+        <nav class="navbar navbar-light" style="background:#ff4949;">
+            <div class="container-fluid">
+                <span class="navbar-brand" style="color:white">HR Analytics -  Task 3</span>
+            </div>
+        </nav>
+        <div class="text-center">
+            <div class="row pt-2">
+                <div class="col-1 text-end pe-2"><strong>Turnover:</strong></div>
+                <div class="col-11">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="to-encoding" value="all" id="to-a"
+                        checked>
+                        <label class="form-check-label" for="to-a">All Employee</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                       
+                        <input class="form-check-input" type="radio" name="to-encoding" value="1" id="to-l">
+                        <label class="form-check-label" for="to-l">Left</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="to-encoding" value="0" id="to-s">
+                        <label class="form-check-label" for="to-s">Stay</label>
+                    </div>
+                   
+                </div>
+            </div>
+            <div class="row pt-2">
+                <div class="col-1 text-end pe-2"  style="font-size: 16px" ><strong>Features:</strong></div>
+                <div class="col-11">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" style="font-size: 14px" type="radio" name="ft-encoding" value="satisfaction_level" id="ft-sl">
+                        <label class="form-check-label" style="font-size: 15px" for="ft-sl">Satisfaction Level</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                       
+                        <input class="form-check-input" style="font-size: 14px"  type="radio" name="ft-encoding" value="last_evaluation" id="ft-le">
+                        <label class="form-check-label" style="font-size: 15px"  for="ft-le">Last Evaluation</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" style="font-size: 14px"  type="radio" name="ft-encoding" value="number_project" id="ft-np">
+                        <label class="form-check-label" style="font-size: 15px"  for="ft-np">Number Project</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" style="font-size: 14px"  type="radio" name="ft-encoding" value="average_montly_hours" id="ft-ah"   checked>
+                        <label class="form-check-label" style="font-size: 15px"  for="ft-ah">Avg. Hours</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" style="font-size: 14px"  type="radio" name="ft-encoding" value="time_spend_company" id="ft-tc">
+                        <label class="form-check-label" style="font-size: 15px"  for="ft-tc">Time In Comp.</label>
+                    </div>
+                   
+                </div>
+            </div>
+            <svg width="1800" height="1200" id="histogram_sat"> </svg>
+        </div>
+    </main>
+
+    <script>
+        let data, heatmap, heat_columns, histogram, binhistogram, dataTable;
+
+        function updateHeatMap() {
+            var selected = d3.select("#dep-selection").node().value;
+            console.log( selected );  
+            heatmap.update(selected==="all"? data : data.filter(d => d["department"] === selected), selected);
+        }
+
+        function updateHistogram() {
+            let xVar = d3.select("input[type=radio][name=sal-encoding]:checked").property("value");            
+            histogram.update(xVar==="all"? data : data.filter(d => d["salary"] === xVar), "department");
+        }
+        function updateBinHistogram() {      
+            let turnover_var = d3.select("input[type=radio][name=to-encoding]:checked").property("value");   
+            let dist_var = d3.select("input[type=radio][name=ft-encoding]:checked").property("value"); 
+         
+            binhistogram.update(turnover_var==="all"? data : data.filter(d => d["turnover"] === parseInt(turnover_var)), dist_var);
+        }
+  
+
+        function updateDataTable() {
+            let xVar = d3.select("input[type=radio][name=sal-encoding]:checked").property("value");     
+            let columns = ["satisfaction_level","last_evaluation","number_project","average_montly_hours","time_spend_company","work_accident","promotion_last_5years"];
+            dataTable.update(xVar==="all"? data : data.filter(d => d["salary"] === xVar), columns)
+        }
+
+
+        d3.csv("HRAnalytics.csv")
+            .then(csvData => {
+                csvData.forEach(d => {
+                    d["satisfaction_level"] = +d["satisfaction_level"];
+                    d["last_evaluation"] = +d["last_evaluation"];
+                    d["number_project"] = +d["number_project"];
+                    d["average_montly_hours"] = +d["average_montly_hours"];
+                    d["time_spend_company"] = +d["time_spend_company"];
+                    d["work_accident"] = +d["work_accident"];
+                    d["promotion_last_5years"] = +d["promotion_last_5years"];
+                    d["turnover"] = +d["turnover"];
+                });
+        
+                data = csvData;
+                
+                // TASK 1
+                heat_columns = data.columns;
+                for (var i = 0; i < heat_columns.length; i++) {
+                    if (heat_columns[i] === "department" || heat_columns[i] === "salary") {
+                        var spliced = heat_columns.splice(i, 1);
+                        i--;
+                    }
+                }
+                heatmap = new Heatmap("#heatmap", heat_columns, "#hm-tooltip");
+                heatmap.initialize();
+                updateHeatMap();
+                d3.select("select[name=dep-options").on("change", ()=>{updateHeatMap();});
+
+                // TASH 2
+                histogram = new Histogram("#histogram", "#sc-tooltip");
+                histogram.initialize();
+                updateHistogram();
+                
+
+                dataTable = new DataTable("#data-table");
+                updateDataTable();
+                d3.selectAll("input[type=radio][name=sal-encoding]").on("change", ()=>{updateDataTable(); updateHistogram();});
+
+                //  TASK 3
+                binhistogram = new BinHistogram("#histogram_sat");
+                binhistogram.initialize();
+                updateBinHistogram();
+                d3.selectAll("input[type=radio][name=to-encoding]").on("change", ()=>{updateBinHistogram();});
+                d3.selectAll("input[type=radio][name=ft-encoding]").on("change", ()=>{updateBinHistogram();});
+            })
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

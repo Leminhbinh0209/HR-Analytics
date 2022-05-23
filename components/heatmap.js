@@ -198,7 +198,7 @@ class Heatmap {
             });
  
         
-        //Color Legend container
+        //Color Legend container 
         this.legendsvg.attr("id", "legend")
                     .attr("transform", `translate(${this.margin.left+this.width+10}, ${this.margin.top+this.height})`)
                     .append("rect")

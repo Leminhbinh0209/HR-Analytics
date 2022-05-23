@@ -221,7 +221,7 @@
         }
 
 
-        d3.csv("HRAnalytics.csv")
+        d3.csv("https://raw.githubusercontent.com/Leminhbinh0209/HR-Analytics/main/HRAnalytics.csv")
             .then(csvData => {
                 csvData.forEach(d => {
                     d["satisfaction_level"] = +d["satisfaction_level"];
